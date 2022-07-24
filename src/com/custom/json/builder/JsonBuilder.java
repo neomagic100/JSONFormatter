@@ -22,6 +22,7 @@ public class JsonBuilder implements JsonCustomable, Map<String, Object> {
 	private List<String> keys;
 	private List<Object> values;
 	private String json;
+	private int numEntries;
 	
 	/**
 	 * Constructor
@@ -29,6 +30,17 @@ public class JsonBuilder implements JsonCustomable, Map<String, Object> {
 	 * @param values
 	 */
 	public JsonBuilder(List<String> keys, List<Object> values) {
+		if (values.size() % keys.size() != 0) 
+			throw new RuntimeException("Invalid list sizes");
+		
+		this.numEntries = keys.size();
+		
+		if (values.size() > keys.size()) {
+			for (int i = keys.size(); i < values.size(); i++) {
+				keys.add(keys.get(i % numEntries));
+			}
+		}
+		
 		this.keys = keys;
 		this.values = values;
 		this.json = this.formatList();
@@ -51,8 +63,12 @@ public class JsonBuilder implements JsonCustomable, Map<String, Object> {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{\n");
 		for (int i = 0; i < this.size(); i++) {
+			if (i > 0 && i % this.entrySize() == 0) {
+				sb.append("\n},\n{");
+			}
 			sb.append("\t");
 			sb.append(formatEntry(this.keys.get(i), this.values.get(i)));
+			
 			
 			if (i < this.size() - 1)
 				sb.append(",\n");
@@ -74,12 +90,22 @@ public class JsonBuilder implements JsonCustomable, Map<String, Object> {
 	@Override
 	public String formatEntry(String key, Object value) {
 		StringBuilder sb = new StringBuilder();
+		Integer n;
+		String t = null;
+		
 		sb.append("\"");
 		sb.append(key);
 		sb.append("\": ");
 		
-		if (value.getClass() == Integer.class || value.getClass() == Float.class 
-				|| value.getClass() == Double.class || value.getClass() == Boolean.class) {
+		try {
+			n =Integer.parseInt((String) value);
+			t= n.toString();
+		}catch (NumberFormatException e){
+			t = "temp";
+		}
+		
+		
+		if (t.matches((String) value)) {
 			sb.append(value);
 		}
 		else {
@@ -103,6 +129,10 @@ public class JsonBuilder implements JsonCustomable, Map<String, Object> {
 	@Override
 	public int size() {
 		return this.keys.size();
+	}
+	
+	public int entrySize() {
+		return this.numEntries;
 	}
 
 	@Override
