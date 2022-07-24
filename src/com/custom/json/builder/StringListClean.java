@@ -1,3 +1,15 @@
+/*
+ * 
+ * Clean input from a List of Strings to convert to JSON format
+ * 
+ * Note: The JSON String being returned can only return JSONs with keys that are one of the following types:
+ * 			String, Integer, Float, Double, Boolean
+ * 
+ * 			This excludes values that contain any type of list, array, map, etc.
+ *
+ * @author Michael Bernhardt
+ */
+
 package com.custom.json.builder;
 
 import java.util.ArrayList;
